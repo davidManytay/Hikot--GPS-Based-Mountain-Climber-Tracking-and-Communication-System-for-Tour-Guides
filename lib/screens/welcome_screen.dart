@@ -1,6 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'guide_access_screen.dart';
+import 'home_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -121,7 +121,7 @@ class WelcomeScreen extends StatelessWidget {
           onTap: () {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const GuideAccessScreen()),
+              MaterialPageRoute(builder: (context) => const HomeScreen()),
             );
           },
           child: Container(
