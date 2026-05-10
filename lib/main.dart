@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'services/settings_service.dart';
 
 void main() async {
@@ -25,7 +25,7 @@ class HikotApp extends StatelessWidget {
         useMaterial3: true,
         fontFamily: 'Inter',
       ),
-      home: const HomeScreen(),
+      home: const WelcomeScreen(),
     );
   }
 }
