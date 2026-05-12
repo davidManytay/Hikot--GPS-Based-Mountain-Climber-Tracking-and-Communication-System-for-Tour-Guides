@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:collection/collection.dart';
 import '../models/gps_packet.dart';
 
+/// Outgoing packet pacing. [GpsPacket.priority] orders types: SOS (0) before heartbeat (1) before GPS (2).
 class PacketScheduler {
   final PriorityQueue<GpsPacket> _queue = PriorityQueue((a, b) => a.priority.compareTo(b.priority));
   final StreamController<GpsPacket> _outputController = StreamController<GpsPacket>.broadcast();

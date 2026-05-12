@@ -1,108 +1,127 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'home_screen.dart';
+import 'login_screen.dart';
+import '../theme/app_theme.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _animation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 3),
+      vsync: this,
+    )..repeat(reverse: true);
+    _animation = Tween<double>(begin: 0.8, end: 1.0).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
-          // Full-screen background image
-          Container(
-            decoration: const BoxDecoration(
-              image: DecorationImage(
-                image: AssetImage('assets/hiker_welcome.png'),
-                fit: BoxFit.cover,
-              ),
-            ),
+          // Background with a subtle zoom animation
+          AnimatedBuilder(
+            animation: _animation,
+            builder: (context, child) {
+              return Transform.scale(
+                scale: 1.0 + (1.0 - _animation.value) * 0.05,
+                child: Container(
+                  decoration: const BoxDecoration(
+                    image: DecorationImage(
+                      image: AssetImage('assets/hiker_welcome.png'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                ),
+              );
+            },
           ),
           
-          // Dark gradient overlay
+          // Darker, more professional gradient overlay
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.2),
-                  Colors.black.withOpacity(0.85),
+                  Colors.black.withOpacity(0.4),
+                  HikotColors.darkBackground.withOpacity(0.95),
                 ],
               ),
             ),
           ),
 
-          // Balanced Centered Content
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 40.0),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center, // Centering the column
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  const SizedBox(height: 20),
-                  // Primary Highlight: HIKOT (Centered)
-                  ShaderMask(
-                    shaderCallback: (bounds) => const LinearGradient(
-                      colors: [Colors.white, Colors.blueAccent],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ).createShader(bounds),
+                  const SizedBox(height: 40),
+                  // HIKOT Logo
+                  FadeTransition(
+                    opacity: _animation,
                     child: const Text(
                       'HIKOT',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 80,
+                        fontSize: 72,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 8.0,
+                        letterSpacing: 12.0,
                         height: 1.0,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: 16),
                   Container(
-                    width: 120,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      color: Colors.blueAccent,
-                      borderRadius: BorderRadius.circular(3),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.blueAccent.withOpacity(0.8),
-                          blurRadius: 15,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
+                    width: 60,
+                    height: 2,
+                    color: Colors.white.withOpacity(0.2),
                   ),
                   const Spacer(),
-                  // Tagline (Centered)
+                  // Tagline
                   const Text(
-                    'Your Safety,\nOur Mission.',
+                    'Precision Safety.\nMission Ready.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 40,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 32,
+                      fontWeight: FontWeight.w900,
                       height: 1.1,
+                      letterSpacing: -0.5,
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  // Description (Centered)
+                  const SizedBox(height: 24),
                   Text(
-                    'Advanced offline tracking and mesh connectivity for the world\'s most challenging trails.',
+                    'Reliable mesh-network tracking for technical\nexpeditions and professional guides.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.7),
-                      fontSize: 16,
+                      color: Colors.white.withOpacity(0.5),
+                      fontSize: 14,
                       height: 1.5,
                     ),
                   ),
-                  const SizedBox(height: 40),
+                  const SizedBox(height: 48),
                   _buildGetStartedButton(context),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -113,40 +132,29 @@ class WelcomeScreen extends StatelessWidget {
   }
 
   Widget _buildGetStartedButton(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-        child: InkWell(
-          onTap: () {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const HomeScreen()),
-            );
-          },
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 20),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.white.withOpacity(0.3), width: 1.5),
-            ),
-            child: const Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  'GET STARTED',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 2,
-                  ),
-                ),
-                SizedBox(width: 12),
-                Icon(Icons.arrow_forward_rounded, color: Colors.white),
-              ],
+    return InkWell(
+      onTap: () {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: BoxDecoration(
+          color: HikotColors.surfaceLight,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.white.withOpacity(0.1)),
+        ),
+        child: const Center(
+          child: Text(
+            'INITIALIZE SYSTEM',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 13,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 3,
             ),
           ),
         ),

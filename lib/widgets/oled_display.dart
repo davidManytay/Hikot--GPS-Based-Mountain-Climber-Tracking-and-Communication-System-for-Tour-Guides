@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/hiker.dart';
+import '../theme/app_theme.dart';
 
 class OledDisplayWidget extends StatelessWidget {
   final Hiker hiker;
@@ -19,47 +20,40 @@ class OledDisplayWidget extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFF000000), // OLED Black
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF333333), width: 4),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blueAccent.withOpacity(0.1),
-            blurRadius: 20,
-            spreadRadius: 5,
-          ),
-        ],
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: const Color(0xFF1E293B), width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // GPS Coordinates (Mimicking the diagram)
+          // GPS Coordinates
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               const Text(
-                'GPS MONITOR',
-                style: TextStyle(color: Colors.blueAccent, fontSize: 10, fontWeight: FontWeight.bold, fontFamily: 'monospace'),
+                'SYSTEM MONITOR',
+                style: TextStyle(color: HikotColors.accent, fontSize: 9, fontWeight: FontWeight.bold, fontFamily: 'monospace', letterSpacing: 1),
               ),
-              Icon(Icons.gps_fixed, size: 12, color: Colors.blueAccent.withOpacity(0.5)),
+              Icon(Icons.sensors, size: 12, color: HikotColors.accent.withOpacity(0.5)),
             ],
           ),
-          const Divider(color: Color(0xFF333333)),
+          const Divider(color: Color(0xFF1E293B), height: 16),
           Text(
-            'LAT: ${hiker.lastLat.toStringAsFixed(4)}°N',
-            style: const TextStyle(color: Colors.greenAccent, fontSize: 16, fontFamily: 'monospace', fontWeight: FontWeight.bold),
+            'LAT: ${hiker.lastLat.toStringAsFixed(5)}',
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace', fontWeight: FontWeight.bold),
           ),
           Text(
-            'LON: ${hiker.lastLon.toStringAsFixed(4)}°E',
-            style: const TextStyle(color: Colors.greenAccent, fontSize: 16, fontFamily: 'monospace', fontWeight: FontWeight.bold),
+            'LON: ${hiker.lastLon.toStringAsFixed(5)}',
+            style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace', fontWeight: FontWeight.bold),
           ),
           const Spacer(),
           
           // BLE MESH Status Bar
-          _buildOledBar('BLE: MESH OK', hiker.signalStrength / 100, Colors.blue),
-          const SizedBox(height: 8),
+          _buildOledBar('MESH SIGNAL', hiker.signalStrength / 100, HikotColors.primary),
+          const SizedBox(height: 10),
           
           // BATTERY Status Bar
-          _buildOledBar('BAT: ${hiker.batteryLevel}%', hiker.batteryLevel / 100, Colors.green),
+          _buildOledBar('BATT STATUS', hiker.batteryLevel / 100, HikotColors.success),
         ],
       ),
     );
@@ -72,18 +66,27 @@ class OledDisplayWidget extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: const TextStyle(color: Colors.white, fontSize: 10, fontFamily: 'monospace')),
-            Text('${(progress * 100).toInt()}%', style: TextStyle(color: color, fontSize: 10, fontFamily: 'monospace')),
+            Text(label, style: const TextStyle(color: HikotColors.textSecondary, fontSize: 9, fontFamily: 'monospace')),
+            Text('${(progress * 100).toInt()}%', style: TextStyle(color: color, fontSize: 9, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
           ],
         ),
-        const SizedBox(height: 4),
-        ClipRRect(
-          borderRadius: BorderRadius.circular(2),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: const Color(0xFF1A1A1A),
-            valueColor: AlwaysStoppedAnimation<Color>(color),
-            minHeight: 6,
+        const SizedBox(height: 6),
+        Container(
+          height: 4,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: const Color(0xFF1E293B),
+            borderRadius: BorderRadius.circular(2),
+          ),
+          child: FractionallySizedBox(
+            alignment: Alignment.centerLeft,
+            widthFactor: progress,
+            child: Container(
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
           ),
         ),
       ],

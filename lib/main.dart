@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'screens/welcome_screen.dart';
 import 'services/settings_service.dart';
+import 'theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Initialize services
   final settings = SettingsService();
   await settings.init();
 
@@ -17,15 +17,18 @@ class HikotApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Hikot - Hiking Safety',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
-        useMaterial3: true,
-        fontFamily: 'Inter',
-      ),
-      home: const WelcomeScreen(),
+    final settings = SettingsService();
+    
+    return ListenableBuilder(
+      listenable: settings,
+      builder: (context, child) {
+        return MaterialApp(
+          title: 'Hikot - Hiking Safety',
+          debugShowCheckedModeBanner: false,
+          theme: settings.isDarkMode ? HikotTheme.darkTheme : HikotTheme.lightTheme,
+          home: const WelcomeScreen(),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/detection.dart';
+import '../theme/app_theme.dart';
 
 class DetectorListPanel extends StatelessWidget {
   final List<Detection> detections;
@@ -35,25 +36,20 @@ class DetectorListPanel extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text(
-                'ACTIVE SOS ALERTS',
-                style: TextStyle(
-                  color: Colors.redAccent,
-                  fontSize: 10,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 2.0,
-                ),
+                'TACTICAL ALERTS',
+                style: HikotTextStyles.label,
               ),
               const SizedBox(width: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.3),
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.red.withOpacity(0.5)),
+                  color: HikotColors.error.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                  border: Border.all(color: HikotColors.error.withOpacity(0.3)),
                 ),
                 child: Text(
                   '${detections.length}',
-                  style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold),
+                  style: const TextStyle(color: HikotColors.error, fontSize: 10, fontWeight: FontWeight.bold),
                 ),
               ),
             ],
@@ -86,87 +82,78 @@ class _DetectionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isSOS = detection.type == DetectionType.sos;
     final color = _getDetectionColor(detection.type);
 
     return Container(
-      width: 220,
-      margin: const EdgeInsets.only(right: 12),
+      width: 240,
+      margin: const EdgeInsets.only(left: 12),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(20),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-              child: Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.12),
-                  border: Border.all(
-                    color: color.withOpacity(0.3),
-                    width: 1.5,
-                  ),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+          borderRadius: BorderRadius.circular(12),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: HikotColors.surface,
+              border: Border.all(
+                color: color.withOpacity(0.2),
+                width: 1,
+              ),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Icon(
-                          _getDetectionIcon(detection.type),
-                          size: 14,
-                          color: color,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          detection.typeLabel,
-                          style: TextStyle(
-                            color: color,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const Spacer(),
-                        Text(
-                          _formatTime(detection.timestamp),
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.4),
-                            fontSize: 9,
-                          ),
-                        ),
-                      ],
+                    Icon(
+                      _getDetectionIcon(detection.type),
+                      size: 14,
+                      color: color,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(width: 8),
                     Text(
-                      detection.hikerName,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 15,
-                        letterSpacing: -0.2,
+                      detection.typeLabel.toUpperCase(),
+                      style: TextStyle(
+                        color: color,
+                        fontSize: 9,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
                       ),
                     ),
-                    const SizedBox(height: 4),
-                    Expanded(
-                      child: Text(
-                        detection.message,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 11,
-                          height: 1.3,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
+                    const Spacer(),
+                    Text(
+                      _formatTime(detection.timestamp),
+                      style: const TextStyle(
+                        color: HikotColors.textMuted,
+                        fontSize: 9,
                       ),
                     ),
                   ],
                 ),
-              ),
+                const SizedBox(height: 12),
+                Text(
+                  detection.hikerName.toUpperCase(),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  detection.message,
+                  style: const TextStyle(
+                    color: HikotColors.textSecondary,
+                    fontSize: 11,
+                    height: 1.4,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ),
@@ -176,21 +163,21 @@ class _DetectionCard extends StatelessWidget {
 
   Color _getDetectionColor(DetectionType type) {
     switch (type) {
-      case DetectionType.sos: return Colors.red;
-      case DetectionType.offTrail: return Colors.orangeAccent;
-      case DetectionType.stationary: return Colors.cyanAccent;
-      case DetectionType.lowBattery: return Colors.deepOrangeAccent;
-      case DetectionType.proximityAlert: return Colors.blueAccent;
+      case DetectionType.sos: return HikotColors.error;
+      case DetectionType.offTrail: return HikotColors.warning;
+      case DetectionType.stationary: return HikotColors.accent;
+      case DetectionType.lowBattery: return HikotColors.warning;
+      case DetectionType.proximityAlert: return HikotColors.primary;
     }
   }
 
   IconData _getDetectionIcon(DetectionType type) {
     switch (type) {
-      case DetectionType.sos: return Icons.sos;
-      case DetectionType.offTrail: return Icons.explore_off;
-      case DetectionType.stationary: return Icons.accessibility_new;
-      case DetectionType.lowBattery: return Icons.battery_alert;
-      case DetectionType.proximityAlert: return Icons.spatial_audio_off;
+      case DetectionType.sos: return Icons.report_problem_rounded;
+      case DetectionType.offTrail: return Icons.explore_off_outlined;
+      case DetectionType.stationary: return Icons.accessibility_new_outlined;
+      case DetectionType.lowBattery: return Icons.battery_alert_outlined;
+      case DetectionType.proximityAlert: return Icons.spatial_audio_off_outlined;
     }
   }
 
