@@ -16,6 +16,7 @@ import '../models/hiker.dart';
 import '../services/mesh_relay_service.dart';
 import '../services/packet_scheduler.dart';
 import '../theme/app_theme.dart';
+import '../widgets/tactical_navigation_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,19 +92,30 @@ class _HomeScreenState extends State<HomeScreen> {
       builder: (context) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
         child: AlertDialog(
-          backgroundColor: HikotColors.surface,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.white.withOpacity(0.05))),
-          title: const Text('Initialize Mission', style: HikotTextStyles.h2),
-          content: TextField(
-            controller: nameController,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              hintText: 'Target Trail (e.g., Mount Apo Sector)',
-              hintStyle: TextStyle(color: Colors.white.withOpacity(0.3)),
-              filled: true,
-              fillColor: Colors.black.withOpacity(0.2),
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
-            ),
+          backgroundColor: Theme.of(context).cardColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.05))),
+          title: const Text('INITIALIZE MISSION', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1.5)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('Enter expedition objective or trail sector name:', style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), fontSize: 13)),
+              const SizedBox(height: 16),
+              TextField(
+                controller: nameController,
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold),
+                decoration: InputDecoration(
+                  hintText: 'e.g. Mount Apo Summit',
+                  hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2)),
+                  filled: true,
+                  fillColor: Theme.of(context).scaffoldBackgroundColor.withOpacity(0.5),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+                  ),
+                ),
+              ),
+            ],
           ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: Text('CANCEL', style: TextStyle(color: HikotColors.textSecondary))),
@@ -111,17 +123,20 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () async {
                 if (nameController.text.isNotEmpty) {
                   await _db.startTrip(nameController.text);
-                  Navigator.pop(context);
-                  _loadData();
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    _loadData();
+                  }
                 }
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: HikotColors.surfaceLight,
-                foregroundColor: Colors.white,
+                backgroundColor: HikotColors.accentTeal,
+                foregroundColor: Colors.black,
                 elevation: 0,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8), side: BorderSide(color: Colors.white.withOpacity(0.1))),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text('START'),
+              child: const Text('DEPLOY', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1)),
             ),
           ],
         ),
@@ -210,9 +225,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: HikotColors.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -403,35 +418,77 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildDashboardHeader() {
     return SliverToBoxAdapter(
-      child: Padding(
-        padding: const EdgeInsets.all(24.0),
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text('Mission Control', style: HikotTextStyles.h1),
-                const SizedBox(height: 4),
-                Text(_currentTrip?.name ?? 'No active expedition', style: const TextStyle(color: HikotColors.textSecondary, fontSize: 16)),
-              ],
+            // Left: Title & Mission
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(width: 3, height: 24, color: HikotColors.accentTeal),
+                      const SizedBox(width: 12),
+                      const Text('Mission Control', style: HikotTextStyles.h1),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 15),
+                    child: Text(
+                      _currentTrip?.name ?? 'No active expedition',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.4),
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        letterSpacing: 0.5,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
+            // Right: Status & Actions
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 _buildStatusBadge(),
-                const SizedBox(height: 8),
-                TextButton.icon(
-                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HardwareSpecsScreen())),
-                  icon: const Icon(Icons.developer_board_outlined, color: HikotColors.accentTeal, size: 20),
-                  label: const Text('Device specs', style: TextStyle(color: HikotColors.accentTeal, fontSize: 13, fontWeight: FontWeight.w700)),
-                  style: TextButton.styleFrom(
-                    backgroundColor: HikotColors.accentTeal.withOpacity(0.1),
+                const SizedBox(height: 12),
+                InkWell(
+                  onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HardwareSpecsScreen())),
+                  borderRadius: BorderRadius.circular(8),
+                  child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                    shape: RoundedRectangleBorder(
+                    decoration: BoxDecoration(
+                      color: HikotColors.accentTeal.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(8),
-                      side: BorderSide(color: HikotColors.accentTeal.withOpacity(0.5)),
+                      border: Border.all(color: HikotColors.accentTeal.withOpacity(0.2)),
+                    ),
+                    child: const Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.developer_board_outlined, color: HikotColors.accentTeal, size: 16),
+                        SizedBox(width: 8),
+                        Text(
+                          'DEVICE SPECS',
+                          style: TextStyle(
+                            color: HikotColors.accentTeal,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: 1,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -456,9 +513,18 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: accent)),
+          Container(
+            width: 8, height: 8, 
+            decoration: BoxDecoration(
+              shape: BoxShape.circle, 
+              color: accent,
+              boxShadow: [
+                BoxShadow(color: accent.withOpacity(0.5), blurRadius: 4, spreadRadius: 1),
+              ],
+            ),
+          ),
           const SizedBox(width: 8),
-          Text(isActive ? 'Mesh active' : 'Standby', style: TextStyle(color: accent, fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 0.2)),
+          Text(isActive ? 'MESH ACTIVE' : 'STANDBY', style: TextStyle(color: accent, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 0.5)),
         ],
       ),
     );
@@ -471,9 +537,9 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 220,
         width: double.infinity,
         decoration: BoxDecoration(
-          color: HikotColors.surface,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withOpacity(0.05)),
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
         ),
         child: Stack(
           children: [
@@ -489,7 +555,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.4),
+                  color: Theme.of(context).dividerColor.withOpacity(0.05),
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: const Text(
@@ -505,57 +571,39 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildBottomNav() {
-    return Container(
-      decoration: BoxDecoration(
-        color: HikotColors.surface,
-        border: Border(top: BorderSide(color: Colors.white.withOpacity(0.05))),
-      ),
-      child: SafeArea(
-        top: false,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 12, 10, 12),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: [
-              _buildTacticalNavItem(Icons.grid_view_rounded, 'HUB', true, () {}),
-              _buildTacticalNavItem(Icons.group_outlined, 'TEAM', false, () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const HikerListScreen())).then((_) => _loadData());
-              }),
-              _buildTacticalNavItem(Icons.radar_outlined, 'MAP', false, () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const MapScreen())).then((_) => _loadData());
-              }),
-              _buildTacticalNavItem(Icons.settings_outlined, 'SETUP', false, () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())).then((_) => _loadData());
-              }),
-            ],
-          ),
+    return TacticalNavigationBar(
+      currentIndex: 0,
+      items: [
+        TacticalNavItem(
+          icon: Icons.grid_view_rounded,
+          label: 'HUB',
+          onTap: () {},
         ),
-      ),
+        TacticalNavItem(
+          icon: Icons.group_outlined,
+          label: 'CLIMBERS',
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const HikerListScreen())).then((_) => _loadData());
+          },
+        ),
+        TacticalNavItem(
+          icon: Icons.radar_outlined,
+          label: 'MAP',
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const MapScreen())).then((_) => _loadData());
+          },
+        ),
+        TacticalNavItem(
+          icon: Icons.settings_outlined,
+          label: 'SETUP',
+          onTap: () {
+            Navigator.push(context, MaterialPageRoute(builder: (context) => const SettingsScreen())).then((_) => _loadData());
+          },
+        ),
+      ],
     );
   }
 
-  Widget _buildTacticalNavItem(IconData icon, String label, bool active, VoidCallback onTap) {
-    final color = active ? HikotColors.primary : HikotColors.textMuted;
-    return InkWell(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: color, size: 24),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              color: color,
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              letterSpacing: 0.6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildMutedGlow(Color color) {
     return Container(
@@ -578,47 +626,58 @@ class _MiniRadarPainter extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) * 0.45;
+    final baseY = center.dy + radius;
+    final startX = center.dx - radius;
+    final endX = center.dx + radius;
+
+    // 0. Draw Mini Mountain Hill
+    final hillPath = Path();
+    hillPath.moveTo(startX, baseY);
+    // Simplified 3-peak form for mini view
+    hillPath.quadraticBezierTo(startX + radius * 0.4, baseY - radius * 0.8, center.dx - radius * 0.3, baseY - radius * 0.3); // Left
+    hillPath.quadraticBezierTo(center.dx, center.dy - radius * 0.3, center.dx + radius * 0.3, baseY - radius * 0.3); // Center
+    hillPath.quadraticBezierTo(endX - radius * 0.4, baseY - radius * 0.8, endX, baseY); // Right
+    
+    final hillPaint = Paint()
+      ..color = Colors.white.withOpacity(0.04)
+      ..style = PaintingStyle.fill;
+    canvas.drawPath(hillPath, hillPaint);
+
+    // 1. Static Grid
     final gridPaint = Paint()
       ..color = Colors.white.withOpacity(0.03)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
-    final radius = math.min(size.width, size.height) * 0.45;
     for (int i = 1; i <= 3; i++) {
       canvas.drawCircle(center, (radius / 3) * i, gridPaint);
     }
     
-    // Trail Path
-    final trailPaint = Paint()
-      ..color = HikotColors.accent.withOpacity(0.1)
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.5;
-    canvas.drawLine(Offset(center.dx, center.dy + radius), Offset(center.dx, center.dy - radius), trailPaint);
+    // 2. Guide Hub
+    final guidePos = Offset(center.dx, center.dy - radius * 0.15);
+    canvas.drawCircle(guidePos, 3, Paint()..color = HikotColors.success);
 
-    // Guide Position
-    final guidePaint = Paint()..color = HikotColors.success;
-    final guidePos = Offset(center.dx, center.dy - radius * 0.4);
-    canvas.drawCircle(guidePos, 4, guidePaint);
-
+    // 3. Hiker Nodes
     final sortedHikers = List<Hiker>.from(hikers)
       ..sort((a, b) => a.hopCount.compareTo(b.hopCount));
 
-    const double miniVerticalSpacing = 18.0;
-    final miniStartY = guidePos.dy + 20;
+    const double miniVerticalSpacing = 14.0;
+    final miniStartY = guidePos.dy + 15;
 
     for (int i = 0; i < sortedHikers.length; i++) {
       final hiker = sortedHikers[i];
       if (hiker.status == HikerStatus.noSignal) continue;
       
       final isLeft = (i % 2 == 0);
-      final xOffset = (isLeft ? -1 : 1) * 12.0; 
+      final xOffset = (isLeft ? -1 : 1) * 10.0; 
       final yPos = miniStartY + (i * miniVerticalSpacing);
       final hikerPos = Offset(center.dx + xOffset, yPos);
       
       if (hikerPos.dy < center.dy + radius) {
         final color = hiker.status == HikerStatus.sos ? HikotColors.error : HikotColors.primary;
-        canvas.drawCircle(hikerPos, 3, Paint()..color = color);
-        canvas.drawCircle(hikerPos, 6, Paint()..color = color.withOpacity(0.2)..style = PaintingStyle.stroke);
+        canvas.drawCircle(hikerPos, 2.5, Paint()..color = color);
+        canvas.drawCircle(hikerPos, 5, Paint()..color = color.withOpacity(0.15)..style = PaintingStyle.stroke);
       }
     }
   }

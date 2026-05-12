@@ -49,7 +49,7 @@ class _GuideAccessScreenState extends State<GuideAccessScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // Background Glow
@@ -73,13 +73,13 @@ class _GuideAccessScreenState extends State<GuideAccessScreen> {
                 // Header
                 const Icon(Icons.security_rounded, color: Colors.blueAccent, size: 48),
                 const SizedBox(height: 24),
-                const Text(
+                Text(
                   'GUIDE ACCESS',
-                  style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 4),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 24, fontWeight: FontWeight.w900, letterSpacing: 4),
                 ),
                 Text(
                   'MISSION CONTROL AUTHENTICATION',
-                  style: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
+                  style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3), fontSize: 9, fontWeight: FontWeight.bold, letterSpacing: 1),
                 ),
                 
                 const SizedBox(height: 60),
@@ -164,7 +164,7 @@ class _GuideAccessScreenState extends State<GuideAccessScreen> {
         child: Center(
           child: Text(
             val,
-            style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w300),
+            style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 24, fontWeight: FontWeight.w300),
           ),
         ),
       ),
@@ -178,7 +178,7 @@ class _GuideAccessScreenState extends State<GuideAccessScreen> {
       child: SizedBox(
         width: 80,
         height: 80,
-        child: Icon(icon, color: Colors.white.withOpacity(0.5), size: 24),
+        child: Icon(icon, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5), size: 24),
       ),
     );
   }

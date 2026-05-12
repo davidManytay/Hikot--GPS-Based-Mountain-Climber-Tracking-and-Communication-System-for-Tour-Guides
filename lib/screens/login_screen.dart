@@ -84,7 +84,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HikotColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           Container(
@@ -106,34 +106,17 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Column(
-                    children: [
-                      const Icon(Icons.shield_rounded, color: HikotColors.accentTeal, size: 48),
-                      const SizedBox(height: 16),
-                      const Text(
-                        'HIKOT',
-                        style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w900, letterSpacing: 8),
-                      ),
-                      Text(
-                        _selectedRole == HikotDeviceRole.guideHub
-                            ? 'Tour guide hub — sign in for team map'
-                            : 'Climber mesh node — no team map on this device',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(color: HikotColors.accentTeal.withOpacity(0.95), fontSize: 13, fontWeight: FontWeight.w600, letterSpacing: 0.2),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 40),
                   Container(
                     constraints: const BoxConstraints(maxWidth: 400),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF0F172A).withOpacity(0.96),
+                      color: Theme.of(context).cardColor.withOpacity(0.96),
                       border: Border.all(color: HikotColors.accentTeal.withOpacity(0.45), width: 1),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: const EdgeInsets.all(28),
                     child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         const Text(
                           'DEVICE ROLE',
@@ -150,6 +133,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           const SizedBox(height: 8),
                           const Text(
                             'Monitor the team map, head count, mesh health, and SOS alerts.',
+                            textAlign: TextAlign.center,
                             style: TextStyle(color: HikotColors.textSecondary, fontSize: 15, height: 1.45),
                           ),
                           const SizedBox(height: 24),
@@ -166,6 +150,7 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                           const SizedBox(height: 8),
                           const Text(
                             'Broadcast GPS over BLE, relay packets for others, and hold SOS for 3 seconds for a priority emergency. No guide map on this handset.',
+                            textAlign: TextAlign.center,
                             style: TextStyle(color: HikotColors.textSecondary, fontSize: 15, height: 1.45),
                           ),
                           const SizedBox(height: 28),
@@ -174,8 +159,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
                       ],
                     ),
                   ),
-                  const SizedBox(height: 16),
-                  _buildFooterInfo(),
                 ],
               ),
             ),
@@ -277,12 +260,12 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
             ),
             Container(
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.4),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
               ),
               child: TextField(
                 controller: controller,
                 obscureText: isPassword,
-                style: const TextStyle(color: Colors.white, fontSize: 16, height: 1.35),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 16, height: 1.35),
                 cursorColor: HikotColors.accentTeal,
                 decoration: InputDecoration(
                   prefixIcon: Icon(icon, color: HikotColors.accentTeal.withOpacity(0.65), size: 22),
@@ -323,17 +306,6 @@ class _LoginScreenState extends State<LoginScreen> with TickerProviderStateMixin
     );
   }
 
-  Widget _buildFooterInfo() {
-    return const Column(
-      children: [
-        Text(
-          'Demo: offline BLE mesh + GPS — no cell service required for mesh relay.',
-          textAlign: TextAlign.center,
-          style: TextStyle(color: HikotColors.textMuted, fontSize: 13, height: 1.4, fontWeight: FontWeight.w500),
-        ),
-      ],
-    );
-  }
 }
 
 class _FieldBorderPainter extends CustomPainter {

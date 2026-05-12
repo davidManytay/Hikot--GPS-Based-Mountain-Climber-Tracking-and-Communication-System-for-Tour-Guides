@@ -61,8 +61,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Colors.black.withOpacity(0.4),
-                  HikotColors.darkBackground.withOpacity(0.95),
+                  Theme.of(context).scaffoldBackgroundColor.withOpacity(0.4),
+                  Theme.of(context).scaffoldBackgroundColor,
                 ],
               ),
             ),
@@ -78,31 +78,52 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                   // HIKOT Logo
                   FadeTransition(
                     opacity: _animation,
-                    child: const Text(
-                      'HIKOT',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 72,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 12.0,
-                        height: 1.0,
-                      ),
+                    child: Column(
+                      children: [
+                        ShaderMask(
+                          shaderCallback: (bounds) => const LinearGradient(
+                            colors: [Colors.white, Color(0xFF93C5FD), Color(0xFF3B82F6)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          ).createShader(bounds),
+                          child: const Text(
+                            'HIKOT',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 72,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: 8.0,
+                              height: 1.1,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          width: 100,
+                          height: 5,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF3B82F6),
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF3B82F6).withOpacity(0.6),
+                                blurRadius: 12,
+                                spreadRadius: 1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: 60,
-                    height: 2,
-                    color: Colors.white.withOpacity(0.2),
                   ),
                   const Spacer(),
                   // Tagline
-                  const Text(
+                  Text(
                     'Precision Safety.\nMission Ready.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Theme.of(context).colorScheme.onSurface,
                       fontSize: 32,
                       fontWeight: FontWeight.w900,
                       height: 1.1,
@@ -114,7 +135,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
                     'Reliable mesh-network tracking for technical\nexpeditions and professional guides.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.white.withOpacity(0.5),
+                      color: Theme.of(context).colorScheme.onSurface.withOpacity(0.5),
                       fontSize: 14,
                       height: 1.5,
                     ),
@@ -143,20 +164,25 @@ class _WelcomeScreenState extends State<WelcomeScreen> with SingleTickerProvider
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: HikotColors.surfaceLight,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.white.withOpacity(0.1)),
+          color: Colors.white.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.3), width: 1),
         ),
-        child: const Center(
-          child: Text(
-            'INITIALIZE SYSTEM',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 13,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 3,
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'GET STARTED',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 2,
+              ),
             ),
-          ),
+            SizedBox(width: 12),
+            Icon(Icons.arrow_forward, color: Colors.white, size: 20),
+          ],
         ),
       ),
     );

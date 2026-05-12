@@ -63,7 +63,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HikotColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Stack(
         children: [
           // No background glow
@@ -86,7 +86,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               const Text('NIGHT VISION MODE', style: HikotTextStyles.label),
                               const SizedBox(height: 4),
-                              Text(_isDark ? 'ACTIVE' : 'INACTIVE', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                              Text(_isDark ? 'ACTIVE' : 'INACTIVE', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 13)),
                             ],
                           ),
                           Switch(
@@ -94,8 +94,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             activeThumbColor: HikotColors.accentTeal,
                             activeTrackColor: HikotColors.accentTeal.withOpacity(0.35),
                             inactiveThumbColor: HikotColors.textMuted,
-                            inactiveTrackColor: Colors.white.withOpacity(0.12),
-                            onChanged: (val) => setState(() => _isDark = val),
+                            inactiveTrackColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.12),
+                            onChanged: (val) {
+                              setState(() => _isDark = val);
+                              _settings.isDarkMode = val; // Apply immediately
+                            },
                           ),
                         ],
                       ),
@@ -111,11 +114,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 8),
                           TextField(
                             controller: _nameController,
-                            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16, letterSpacing: 1),
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurface, 
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 16, 
+                              letterSpacing: 1
+                            ),
                             decoration: InputDecoration(
                               prefixIcon: const Icon(Icons.shield_outlined, color: HikotColors.accentTeal, size: 22),
                               hintText: "ENTER CALLSIGN",
-                              hintStyle: TextStyle(color: Colors.white.withOpacity(0.1)),
+                              hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1)),
                               border: InputBorder.none,
                               contentPadding: const EdgeInsets.symmetric(vertical: 12),
                             ),
@@ -219,7 +227,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       pinned: true,
       centerTitle: true,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back_ios_new, size: 18, color: Colors.white),
+        icon: Icon(Icons.arrow_back_ios_new, size: 18, color: Theme.of(context).colorScheme.onSurface),
         onPressed: () => Navigator.pop(context),
       ),
       title: const Text('SYSTEM CONFIG', style: HikotTextStyles.label),
@@ -240,7 +248,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
+                    Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5)),
                     Text(sub, style: const TextStyle(color: HikotColors.textMuted, fontSize: 8, fontWeight: FontWeight.bold)),
                   ],
                 ),
@@ -254,7 +262,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           data: SliderThemeData(
             trackHeight: 2,
             activeTrackColor: accentColor,
-            inactiveTrackColor: Colors.white.withOpacity(0.05),
+            inactiveTrackColor: Theme.of(context).dividerColor.withOpacity(0.1),
             thumbColor: Colors.white,
             overlayColor: accentColor.withOpacity(0.1),
             thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6, elevation: 0),
@@ -278,7 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Text(title, style: HikotTextStyles.label),
         const Spacer(),
-        Text(code, style: TextStyle(color: Colors.white.withOpacity(0.1), fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
+        Text(code, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.1), fontSize: 10, fontFamily: 'monospace', fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -287,9 +295,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: HikotColors.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       child: child,
     );

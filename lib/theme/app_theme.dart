@@ -24,7 +24,6 @@ class HikotTextStyles {
   static const TextStyle h1 = TextStyle(
     fontSize: 28,
     fontWeight: FontWeight.bold,
-    color: HikotColors.textPrimary,
     letterSpacing: -0.5,
     height: 1.2,
   );
@@ -32,7 +31,6 @@ class HikotTextStyles {
   static const TextStyle h2 = TextStyle(
     fontSize: 22,
     fontWeight: FontWeight.bold,
-    color: HikotColors.textPrimary,
     letterSpacing: -0.3,
     height: 1.25,
   );
@@ -40,21 +38,18 @@ class HikotTextStyles {
   static const TextStyle body = TextStyle(
     fontSize: 16,
     fontWeight: FontWeight.normal,
-    color: HikotColors.textPrimary,
     height: 1.45,
   );
 
   static const TextStyle bodySecondary = TextStyle(
     fontSize: 15,
     fontWeight: FontWeight.normal,
-    color: HikotColors.textSecondary,
     height: 1.45,
   );
 
   static const TextStyle label = TextStyle(
     fontSize: 12,
     fontWeight: FontWeight.w700,
-    color: HikotColors.textSecondary,
     letterSpacing: 1.2,
     height: 1.2,
   );
@@ -62,7 +57,6 @@ class HikotTextStyles {
   static const TextStyle tacticalValue = TextStyle(
     fontSize: 32,
     fontWeight: FontWeight.bold,
-    color: HikotColors.textPrimary,
     letterSpacing: -1,
     height: 1.1,
   );
@@ -71,7 +65,6 @@ class HikotTextStyles {
   static const TextStyle meta = TextStyle(
     fontSize: 13,
     fontWeight: FontWeight.w500,
-    color: HikotColors.textMuted,
     height: 1.3,
   );
 }
@@ -189,13 +182,18 @@ class HikotTheme {
       useMaterial3: true,
       brightness: Brightness.light,
       scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+      dividerColor: const Color(0xFFE2E8F0),
+      cardColor: Colors.white,
       colorScheme: const ColorScheme.light(
         primary: Color(0xFF0D9488),
         onPrimary: Colors.white,
         surface: Colors.white,
         onSurface: Color(0xFF0F172A),
+        secondary: Color(0xFF64748B),
+        onSecondary: Colors.white,
         error: Color(0xFFDC2626),
         onError: Colors.white,
+        outline: Color(0xFFE2E8F0),
       ),
       textTheme: TextTheme(
         headlineLarge: HikotTextStyles.h1.copyWith(color: const Color(0xFF0F172A)),
@@ -209,6 +207,60 @@ class HikotTheme {
         backgroundColor: Colors.white,
         foregroundColor: Color(0xFF0F172A),
         elevation: 0,
+        centerTitle: true,
+        titleTextStyle: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF0F172A),
+        ),
+      ),
+      cardTheme: CardThemeData(
+        color: Colors.white,
+        elevation: 0,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: const Color(0xFF1E293B),
+        contentTextStyle: const TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          height: 1.35,
+        ),
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: const Color(0xFFF1F5F9),
+        hintStyle: TextStyle(color: const Color(0xFF94A3B8).withOpacity(0.85)),
+        labelStyle: const TextStyle(color: Color(0xFF475569), fontSize: 15),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF0D9488), width: 1.5),
+        ),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          foregroundColor: Colors.white,
+          backgroundColor: const Color(0xFF0D9488),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+        ),
       ),
     );
   }

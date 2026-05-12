@@ -11,6 +11,9 @@ import '../models/gps_packet.dart';
 import '../services/auth_service.dart';
 import '../services/mesh_relay_service.dart';
 import '../services/settings_service.dart';
+import '../theme/app_theme.dart';
+import '../widgets/tactical_navigation_bar.dart';
+import 'hardware_specs_screen.dart';
 import 'login_screen.dart';
 
 /// Light "My status" node UI + IoT reference image (climber layer).
@@ -23,17 +26,6 @@ class ClimberNodeScreen extends StatefulWidget {
   State<ClimberNodeScreen> createState() => _ClimberNodeScreenState();
 }
 
-class _ClimberLight {
-  static const Color background = Color(0xFFF6F4F0);
-  static const Color card = Color(0xFFFFFFFF);
-  static const Color cardBorder = Color(0xFFE8E4DD);
-  static const Color text = Color(0xFF1C1C1E);
-  static const Color sub = Color(0xFF6B6B6B);
-  static const Color accentBlue = Color(0xFF2563EB);
-  static const Color onlineGreen = Color(0xFF16A34A);
-  static const Color sosTint = Color(0xFFFFF5F5);
-  static const Color sosBorder = Color(0xFFFECACA);
-}
 
 class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
   final _settings = SettingsService();
@@ -262,9 +254,9 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
 
   BoxDecoration _climberCardDecoration({Color? color}) {
     return BoxDecoration(
-      color: color ?? _ClimberLight.card,
+      color: color ?? Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: _ClimberLight.cardBorder),
+      border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
     );
   }
 
@@ -278,14 +270,14 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
             title.toUpperCase(),
             style: const TextStyle(
               fontSize: 11,
-              fontWeight: FontWeight.w700,
-              letterSpacing: 1.1,
-              color: _ClimberLight.sub,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 2.0,
+              color: HikotColors.accentTeal,
             ),
           ),
           if (subtitle != null) ...[
             const SizedBox(height: 4),
-            Text(subtitle, style: const TextStyle(fontSize: 13, color: _ClimberLight.sub, height: 1.35)),
+            Text(subtitle, style: const TextStyle(fontSize: 13, color: HikotColors.textSecondary, height: 1.35)),
           ],
         ],
       ),
@@ -295,9 +287,10 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
   void _showSettingsSheet() {
     showModalBottomSheet<void>(
       context: context,
-      backgroundColor: _ClimberLight.card,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      backgroundColor: Theme.of(context).cardColor,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
       ),
       builder: (ctx) {
         return StatefulBuilder(
@@ -309,40 +302,72 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Center(
-                    child: Container(width: 40, height: 4, decoration: BoxDecoration(color: Colors.grey.shade300, borderRadius: BorderRadius.circular(2))),
-                  ),
-                  const SizedBox(height: 20),
-                  const Text('Node settings', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: _ClimberLight.text)),
-                  const SizedBox(height: 16),
-                  TextField(
-                    controller: _nodeIdController,
-                    decoration: InputDecoration(
-                      labelText: 'Mesh node ID',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    child: Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 24),
+                  const Text(
+                    'NODE SETTINGS',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: _nodeIdController,
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                    decoration: InputDecoration(
+                      labelText: 'MESH NODE ID',
+                      labelStyle: const TextStyle(color: HikotColors.accentTeal, fontSize: 12, fontWeight: FontWeight.w800),
+                      hintText: 'Enter callsign',
+                      hintStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.2)),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
                   SwitchListTile(
                     contentPadding: EdgeInsets.zero,
-                    title: const Text('Share GPS on mesh'),
-                    subtitle: const Text('Broadcasts position for the guide handset over BLE (no cell service).'),
+                    title: Text('SHARE GPS ON MESH', style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.w700, fontSize: 14)),
+                    subtitle: const Text(
+                      'Broadcasts position for the guide handset over BLE (no cell service).',
+                      style: TextStyle(color: HikotColors.textSecondary, fontSize: 12),
+                    ),
                     value: _settings.climberBroadcastGpsOnMesh,
-                    activeThumbColor: _ClimberLight.accentBlue,
+                    activeColor: HikotColors.accentTeal,
                     onChanged: (v) {
                       _settings.climberBroadcastGpsOnMesh = v;
                       setModal(() {});
                       setState(() {});
                     },
                   ),
-                  const SizedBox(height: 8),
-                  Text(_meshHint, style: const TextStyle(color: _ClimberLight.sub, fontSize: 14, height: 1.4)),
-                  const SizedBox(height: 20),
-                  OutlinedButton(
+                  const SizedBox(height: 12),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    ),
+                    child: Text(
+                      _meshHint,
+                      style: const TextStyle(color: HikotColors.textMuted, fontSize: 13, height: 1.4),
+                    ),
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
                     onPressed: () {
                       Navigator.pop(ctx);
                       _changeRole();
                     },
-                    child: const Text('Switch to guide role'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: HikotColors.surfaceLight,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                    ),
+                    child: const Text('SWITCH TO GUIDE ROLE', style: TextStyle(fontWeight: FontWeight.w900, letterSpacing: 1.5)),
                   ),
                 ],
               ),
@@ -396,10 +421,8 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.dark.copyWith(statusBarColor: Colors.transparent));
-
     return Scaffold(
-      backgroundColor: _ClimberLight.background,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -429,13 +452,7 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
                 ],
               ),
             ),
-            DecoratedBox(
-              decoration: BoxDecoration(
-                color: _ClimberLight.card,
-                border: Border(top: BorderSide(color: _ClimberLight.cardBorder)),
-              ),
-              child: _buildBottomNav(),
-            ),
+            _buildBottomNav(),
           ],
         ),
       ),
@@ -450,41 +467,70 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
+              Text(
                 'My status',
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.w800, color: _ClimberLight.text, height: 1.12, letterSpacing: -0.3),
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: Theme.of(context).colorScheme.onSurface, height: 1.1, letterSpacing: -0.5),
               ),
               const SizedBox(height: 6),
               Text(
                 'Climber node · ${_meshReady ? 'Mesh active' : 'Mesh limited'}',
-                style: const TextStyle(fontSize: 14, color: _ClimberLight.sub, fontWeight: FontWeight.w500, height: 1.3),
+                style: const TextStyle(fontSize: 14, color: HikotColors.textSecondary, fontWeight: FontWeight.w500, height: 1.3),
+              ),
+              const SizedBox(height: 8),
+              InkWell(
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const HardwareSpecsScreen())),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: HikotColors.accentTeal.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: HikotColors.accentTeal.withOpacity(0.3)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.developer_board_rounded, color: HikotColors.accentTeal, size: 14),
+                      SizedBox(width: 6),
+                      Text(
+                        'DEVICE SPECS',
+                        style: TextStyle(color: HikotColors.accentTeal, fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 0.5),
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
         const SizedBox(width: 12),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
           decoration: BoxDecoration(
-            color: _meshReady ? const Color(0xFFE8F5E9) : const Color(0xFFFFF3E0),
-            borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: _meshReady ? const Color(0xFFC8E6C9) : const Color(0xFFFFE0B2)),
+            color: _meshReady ? HikotColors.success.withOpacity(0.1) : HikotColors.warning.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: (_meshReady ? HikotColors.success : HikotColors.warning).withOpacity(0.3)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Container(
-                width: 8,
-                height: 8,
+                width: 6,
+                height: 6,
                 decoration: BoxDecoration(
-                  color: _meshReady ? _ClimberLight.onlineGreen : const Color(0xFFF59E0B),
+                  color: _meshReady ? HikotColors.success : HikotColors.warning,
                   shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: (_meshReady ? HikotColors.success : HikotColors.warning).withOpacity(0.5),
+                      blurRadius: 4,
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Text(
                 _meshReady ? 'Mesh on' : 'GPS only',
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13, color: _ClimberLight.text),
+                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13, color: Colors.white, letterSpacing: 0.5),
               ),
             ],
           ),
@@ -500,26 +546,31 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
         decoration: _climberCardDecoration(),
         clipBehavior: Clip.antiAlias,
         child: Theme(
-          data: Theme.of(context).copyWith(dividerColor: Colors.transparent, splashColor: _ClimberLight.accentBlue.withOpacity(0.08)),
+          data: Theme.of(context).copyWith(
+            dividerColor: Colors.transparent,
+            splashColor: HikotColors.accentTeal.withOpacity(0.08),
+          ),
           child: ExpansionTile(
             initiallyExpanded: false,
             tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
             childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+            iconColor: HikotColors.accentTeal,
+            collapsedIconColor: HikotColors.textMuted,
             title: const Row(
               children: [
-                Icon(Icons.info_outline_rounded, size: 20, color: _ClimberLight.accentBlue),
+                Icon(Icons.info_outline_rounded, size: 20, color: HikotColors.accentTeal),
                 SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'How this node works',
-                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _ClimberLight.text),
+                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                 ),
               ],
             ),
             subtitle: const Padding(
               padding: EdgeInsets.only(top: 4),
-              child: Text('GPS relay, mesh peers, SOS', style: TextStyle(fontSize: 12, color: _ClimberLight.sub)),
+              child: Text('GPS relay, mesh peers, SOS', style: TextStyle(fontSize: 12, color: HikotColors.textMuted)),
             ),
             children: [
               _howLine(Icons.share_location_outlined, 'When enabled, shares GPS on the mesh (~every 12s) so the guide handset can follow you offline.'),
@@ -538,9 +589,9 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 18, color: _ClimberLight.sub),
+        Icon(icon, size: 18, color: HikotColors.textMuted),
         const SizedBox(width: 10),
-        Expanded(child: Text(text, style: const TextStyle(fontSize: 13, height: 1.4, color: _ClimberLight.sub))),
+        Expanded(child: Text(text, style: const TextStyle(fontSize: 13, height: 1.4, color: HikotColors.textSecondary))),
       ],
     );
   }
@@ -554,9 +605,13 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(12),
-            child: SizedBox(
+            child: Container(
               width: 88,
               height: 88,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.2),
+                border: Border.all(color: Colors.white.withOpacity(0.05)),
+              ),
               child: Image.asset(
                 ClimberNodeScreen.iotImageAsset,
                 fit: BoxFit.cover,
@@ -566,26 +621,31 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
                   fit: BoxFit.cover,
                   alignment: Alignment.center,
                   errorBuilder: (_, ___, ____) => ColoredBox(
-                    color: Colors.grey.shade300,
-                    child: Icon(Icons.image_not_supported_outlined, color: Colors.grey.shade600),
+                    color: HikotColors.surfaceLight,
+                    child: Icon(Icons.developer_board_rounded, color: HikotColors.accentTeal.withOpacity(0.5)),
                   ),
                 ),
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
                   'Wearable node',
-                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15, color: _ClimberLight.text),
+                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.white, letterSpacing: 0.2),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Mesh ID ${_settings.climberNodeId}',
+                  style: const TextStyle(fontSize: 13, color: HikotColors.accentTeal, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  'Mesh ID ${_settings.climberNodeId} · change in Settings',
-                  style: const TextStyle(fontSize: 12, color: _ClimberLight.sub, height: 1.35),
+                const Text(
+                  'Status: Operational',
+                  style: TextStyle(fontSize: 12, color: HikotColors.textMuted),
                 ),
               ],
             ),
@@ -603,9 +663,9 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(value, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: _ClimberLight.text, height: 1.05)),
+          Text(value, style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w900, color: Colors.white, height: 1.0, letterSpacing: -0.5)),
           const SizedBox(height: 8),
-          Text(label, style: const TextStyle(fontSize: 12, color: _ClimberLight.sub, fontWeight: FontWeight.w600)),
+          Text(label, style: const TextStyle(fontSize: 11, color: HikotColors.textSecondary, fontWeight: FontWeight.w800, letterSpacing: 0.5)),
         ],
       ),
     );
@@ -637,19 +697,19 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
         children: [
           const Row(
             children: [
-              Icon(Icons.my_location_outlined, size: 20, color: _ClimberLight.accentBlue),
-              SizedBox(width: 8),
-              Text('Coordinates', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: _ClimberLight.text)),
+              Icon(Icons.my_location_outlined, size: 20, color: HikotColors.accentTeal),
+              SizedBox(width: 10),
+              Text('Coordinates', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.2)),
             ],
           ),
-          const SizedBox(height: 4),
-          const Divider(height: 24, color: _ClimberLight.cardBorder),
+          const SizedBox(height: 8),
+          Divider(height: 24, color: Colors.white.withOpacity(0.05)),
           _gpsRow('Latitude', _latStr()),
-          const Divider(height: 1, color: _ClimberLight.cardBorder),
+          Divider(height: 1, color: Colors.white.withOpacity(0.05)),
           _gpsRow('Longitude', _lonStr()),
-          const Divider(height: 1, color: _ClimberLight.cardBorder),
+          Divider(height: 1, color: Colors.white.withOpacity(0.05)),
           _gpsRow('Elevation', _elevStr()),
-          const Divider(height: 1, color: _ClimberLight.cardBorder),
+          Divider(height: 1, color: Colors.white.withOpacity(0.05)),
           _gpsRow('Last sync', _syncStr()),
         ],
       ),
@@ -658,15 +718,15 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
 
   Widget _gpsRow(String k, String v) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 12),
       child: Row(
         children: [
           SizedBox(
             width: 96,
-            child: Text(k, style: const TextStyle(fontSize: 13, color: _ClimberLight.sub, fontWeight: FontWeight.w600)),
+            child: Text(k, style: const TextStyle(fontSize: 13, color: HikotColors.textMuted, fontWeight: FontWeight.w600)),
           ),
           Expanded(
-            child: Text(v, textAlign: TextAlign.end, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: _ClimberLight.text)),
+            child: Text(v, textAlign: TextAlign.end, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: Colors.white, letterSpacing: 0.2)),
           ),
         ],
       ),
@@ -678,21 +738,21 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: _ClimberLight.sosTint,
+        color: HikotColors.error.withOpacity(0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _ClimberLight.sosBorder),
+        border: Border.all(color: HikotColors.error.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           const Row(
             children: [
-              Icon(Icons.health_and_safety_outlined, size: 20, color: Color(0xFFDC2626)),
-              SizedBox(width: 8),
+              Icon(Icons.health_and_safety_rounded, size: 22, color: HikotColors.error),
+              SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'SOS uses BLE mesh with your last coordinates.',
-                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: _ClimberLight.text, height: 1.3),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white, height: 1.3),
                 ),
               ),
             ],
@@ -703,7 +763,7 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
           const Text(
             'Hold the bar for 3 seconds, or release early to cancel. Mesh broadcast is prioritized.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: _ClimberLight.sub, height: 1.4),
+            style: TextStyle(fontSize: 12, color: HikotColors.textSecondary, height: 1.4),
           ),
         ],
       ),
@@ -729,20 +789,20 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
                   height: 56,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
-                    color: _ClimberLight.card,
+                    color: Colors.black.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: _ClimberLight.text.withOpacity(0.22), width: 1),
+                    border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
                   ),
                   child: _sending
-                      ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2.5))
+                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: HikotColors.error))
                       : Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.touch_app_outlined, size: 20, color: _ClimberLight.text.withOpacity(0.7)),
-                            const SizedBox(width: 8),
+                            Icon(Icons.touch_app_rounded, size: 20, color: HikotColors.error.withOpacity(0.8)),
+                            const SizedBox(width: 10),
                             const Text(
-                              'Hold for SOS (3 sec)',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: _ClimberLight.text),
+                              'HOLD FOR SOS (3 SEC)',
+                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0),
                             ),
                           ],
                         ),
@@ -758,7 +818,7 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
                         value: _holdProgress,
                         minHeight: 4,
                         backgroundColor: Colors.transparent,
-                        color: const Color(0xFFDC2626),
+                        color: HikotColors.error,
                       ),
                     ),
                   ),
@@ -766,9 +826,9 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
             ),
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         TextButton(
-          style: TextButton.styleFrom(foregroundColor: const Color(0xFFB91C1C)),
+          style: TextButton.styleFrom(foregroundColor: HikotColors.error.withOpacity(0.7)),
           onPressed: _sending
               ? null
               : () {
@@ -801,31 +861,30 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
   }
 
   Widget _buildBottomNav() {
-    return NavigationBarTheme(
-      data: NavigationBarThemeData(
-        indicatorColor: _ClimberLight.accentBlue.withOpacity(0.12),
-        labelTextStyle: WidgetStateProperty.resolveWith((s) {
-          final selected = s.contains(WidgetState.selected);
-          return TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: selected ? _ClimberLight.accentBlue : _ClimberLight.sub,
-          );
-        }),
-      ),
-      child: NavigationBar(
-        height: 64,
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        selectedIndex: _navIndex,
-        onDestinationSelected: _onBottomNav,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.map_outlined), selectedIcon: Icon(Icons.map), label: 'Map'),
-          NavigationDestination(icon: Icon(Icons.warning_amber_rounded), selectedIcon: Icon(Icons.warning_amber_rounded), label: 'SOS'),
-          NavigationDestination(icon: Icon(Icons.settings_outlined), selectedIcon: Icon(Icons.settings), label: 'Settings'),
-        ],
-      ),
+    return TacticalNavigationBar(
+      currentIndex: _navIndex,
+      items: [
+        TacticalNavItem(
+          icon: Icons.home_rounded,
+          label: 'HOME',
+          onTap: () => _onBottomNav(0),
+        ),
+        TacticalNavItem(
+          icon: Icons.radar_rounded,
+          label: 'MAP',
+          onTap: () => _onBottomNav(1),
+        ),
+        TacticalNavItem(
+          icon: Icons.health_and_safety_rounded,
+          label: 'SOS',
+          onTap: () => _onBottomNav(2),
+        ),
+        TacticalNavItem(
+          icon: Icons.settings_rounded,
+          label: 'SETUP',
+          onTap: () => _onBottomNav(3),
+        ),
+      ],
     );
   }
 }

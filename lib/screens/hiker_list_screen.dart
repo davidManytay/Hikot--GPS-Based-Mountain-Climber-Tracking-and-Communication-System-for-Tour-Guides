@@ -37,10 +37,10 @@ class _HikerListScreenState extends State<HikerListScreen> {
       builder: (dialogContext) => BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: AlertDialog(
-          backgroundColor: HikotColors.surface,
+          backgroundColor: Theme.of(context).cardColor,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
-            side: BorderSide(color: Colors.white.withOpacity(0.05)),
+            side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.05)),
           ),
           title: Column(
             children: [
@@ -94,13 +94,13 @@ class _HikerListScreenState extends State<HikerListScreen> {
   Widget _buildDialogField(TextEditingController controller, String hint, IconData icon) {
     return TextField(
       controller: controller,
-      style: const TextStyle(color: Colors.white, fontSize: 14),
+      style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14),
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: HikotColors.accent, size: 18),
         labelText: hint,
-        labelStyle: TextStyle(color: Colors.white.withOpacity(0.3), fontSize: 10, letterSpacing: 1),
+        labelStyle: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3), fontSize: 10, letterSpacing: 1),
         filled: true,
-        fillColor: Colors.black.withOpacity(0.2),
+        fillColor: Theme.of(context).colorScheme.onSurface.withOpacity(0.05),
         enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: BorderSide.none),
         focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(8), borderSide: const BorderSide(color: HikotColors.primary, width: 1)),
       ),
@@ -110,14 +110,14 @@ class _HikerListScreenState extends State<HikerListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HikotColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('TEAM ROSTER', style: HikotTextStyles.label),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
         leading: IconButton(
-          icon: const Icon(Icons.chevron_left, color: Colors.white),
+          icon: Icon(Icons.chevron_left, color: Theme.of(context).colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -161,9 +161,9 @@ class _HikerListScreenState extends State<HikerListScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: HikotColors.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -186,13 +186,13 @@ class _HikerListScreenState extends State<HikerListScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(hiker.name.toUpperCase(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5)),
+                  Text(hiker.name.toUpperCase(), style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 14, letterSpacing: 0.5)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(hiker.deviceId, style: const TextStyle(color: HikotColors.textMuted, fontSize: 10, fontWeight: FontWeight.w600)),
                       const SizedBox(width: 8),
-                      Container(width: 4, height: 4, decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.white.withOpacity(0.1))),
+                      Container(width: 4, height: 4, decoration: BoxDecoration(shape: BoxShape.circle, color: Theme.of(context).dividerColor.withOpacity(0.1))),
                       const SizedBox(width: 8),
                       Text('REGISTERED', style: TextStyle(color: HikotColors.success.withOpacity(0.7), fontSize: 9, fontWeight: FontWeight.bold)),
                     ],

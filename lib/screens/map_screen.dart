@@ -36,7 +36,9 @@ class _MapScreenState extends State<MapScreen> {
   Map<String, List<Offset>> _hikerHistory = {};
   List<Detection> _detections = [];
   String? _alertMessage;
-  
+  double _guideLat = 7.0700;
+  double _guideLon = 125.6100;
+
   final List<Offset> _trailBoundaryOffsets = [
     const Offset(0, 0),
     const Offset(0.2, 0.5),
@@ -179,6 +181,15 @@ class _MapScreenState extends State<MapScreen> {
         case 2: _triggerDemoPacket(targetId, 0.002, -0.001, PacketType.gps, 12, 1); break;
         case 3: _triggerDemoPacket(targetId, -0.002, 0.003, PacketType.sos, 45, 3); break;
       }
+
+      // Add slight jitter to guide coords to simulate live sensor data
+      if (mounted) {
+        setState(() {
+          _guideLat = 7.0700 + (math.Random().nextDouble() - 0.5) * 0.0002;
+          _guideLon = 125.6100 + (math.Random().nextDouble() - 0.5) * 0.0002;
+        });
+      }
+
       if (_scenarioStep > 20) timer.cancel();
     });
   }
@@ -200,13 +211,13 @@ class _MapScreenState extends State<MapScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: HikotColors.darkBackground,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         onPressed: _runDefenseScenario,
-        backgroundColor: HikotColors.surfaceLight,
+        backgroundColor: Theme.of(context).cardColor,
         elevation: 0,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Colors.white.withOpacity(0.1))),
-        child: const Icon(Icons.radar, color: Colors.white),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.1))),
+        child: Icon(Icons.radar, color: Theme.of(context).colorScheme.onSurface),
       ),
       body: Stack(
         children: [
@@ -217,8 +228,9 @@ class _MapScreenState extends State<MapScreen> {
               height: MediaQuery.of(context).size.height,
               child: TacticalRadar(
                 hikers: _hikerStates.values.toList(),
-                guideLat: 7.0700,
-                guideLon: 125.6100,
+                guideLat: _guideLat,
+                guideLon: _guideLon,
+                isDarkMode: Theme.of(context).brightness == Brightness.dark,
               ),
             ),
           ),
@@ -229,7 +241,10 @@ class _MapScreenState extends State<MapScreen> {
           // Bottom Status Panel
           Positioned(
             bottom: 24, left: 24,
-            child: _buildHUDCoordPanel("7.0700 N", "125.6100 E"),
+            child: _buildHUDCoordPanel(
+              "${_guideLat.toStringAsFixed(4)} N", 
+              "${_guideLon.toStringAsFixed(4)} E"
+            ),
           ),
 
           // SOS Panel
@@ -265,10 +280,21 @@ class _MapScreenState extends State<MapScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const Text('Offline map · Philippines', style: TextStyle(color: HikotColors.accentTeal, fontSize: 13, fontWeight: FontWeight.w700, letterSpacing: 0.2)),
-              const Text('Mount Apo sector (cached)', style: HikotTextStyles.h2),
+              Row(
+                children: [
+                  const Text('Mount Apo sector (cached)', style: HikotTextStyles.h2),
+                  const SizedBox(width: 8),
+                  GestureDetector(
+                    onTap: () => setState(() => _alertMessage = "Sector deletion requires admin privileges"),
+                    child: Icon(Icons.close, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3), size: 16),
+                  ),
+                ],
+              ),
             ],
           ),
           const Spacer(),
+          _buildHUDIconButton(Icons.add, () => setState(() => _alertMessage = "Searching for local offline maps...")),
+          const SizedBox(width: 12),
           _buildHUDIconButton(Icons.layers_outlined, () {}),
         ],
       ),
@@ -276,13 +302,22 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _buildHUDIconButton(IconData icon, VoidCallback onTap) {
-    return Container(
-      decoration: BoxDecoration(
-        color: HikotColors.surface,
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor.withOpacity(0.8),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+          ),
+          child: Center(child: Icon(icon, color: Theme.of(context).colorScheme.onSurface, size: 18)),
+        ),
       ),
-      child: IconButton(icon: Icon(icon, color: Colors.white, size: 18), onPressed: onTap),
     );
   }
 
@@ -311,7 +346,7 @@ class _MapScreenState extends State<MapScreen> {
       children: [
         Text(label, style: const TextStyle(color: HikotColors.accentTeal, fontSize: 12, fontWeight: FontWeight.w700)),
         const SizedBox(width: 8),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontFamily: 'monospace')),
+        Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14, fontFamily: 'monospace')),
       ],
     );
   }
@@ -325,17 +360,18 @@ class _MapScreenState extends State<MapScreen> {
     super.dispose();
   }
 }
-
 class TacticalRadar extends StatefulWidget {
   final List<Hiker> hikers;
   final double guideLat;
   final double guideLon;
+  final bool isDarkMode;
 
   const TacticalRadar({
     super.key,
     required this.hikers,
     required this.guideLat,
     required this.guideLon,
+    this.isDarkMode = true,
   });
 
   @override
@@ -363,9 +399,13 @@ class _TacticalRadarState extends State<TacticalRadar> with SingleTickerProvider
       animation: _controller,
       builder: (context, child) {
         return CustomPaint(
+          size: Size.infinite,
           painter: _RadarPainter(
             rotation: _controller.value,
             hikers: widget.hikers,
+            guideLat: widget.guideLat,
+            guideLon: widget.guideLon,
+            isDarkMode: widget.isDarkMode,
           ),
         );
       },
@@ -376,20 +416,73 @@ class _TacticalRadarState extends State<TacticalRadar> with SingleTickerProvider
 class _RadarPainter extends CustomPainter {
   final double rotation;
   final List<Hiker> hikers;
+  final double guideLat;
+  final double guideLon;
+  final bool isDarkMode;
 
   _RadarPainter({
     required this.rotation,
     required this.hikers,
+    required this.guideLat,
+    required this.guideLon,
+    required this.isDarkMode,
   });
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = math.min(size.width, size.height) * 0.42; 
+    final baseY = center.dy + radius;
+    final startX = -50.0; 
+    final endX = size.width + 50.0;
 
-    // 1. Draw Static Grid
+    // 0. Detailed Mountain Silhouette
+    final hillPath = Path();
+    hillPath.moveTo(startX, baseY);
+    
+    // Left Hill
+    hillPath.lineTo(startX + 40, baseY - 5);
+    hillPath.quadraticBezierTo(center.dx - radius * 0.9, baseY - radius * 1.3, center.dx - radius * 0.55, baseY - radius * 0.4);
+    // Valley 1
+    hillPath.quadraticBezierTo(center.dx - radius * 0.45, baseY - radius * 0.1, center.dx - radius * 0.3, baseY - radius * 0.4);
+    // Main Summit
+    hillPath.quadraticBezierTo(center.dx - radius * 0.15, center.dy - radius * 0.3, center.dx, center.dy - radius * 0.5); 
+    hillPath.quadraticBezierTo(center.dx + radius * 0.2, center.dy - radius * 0.2, center.dx + radius * 0.4, baseY - radius * 0.4);
+    // Valley 2
+    hillPath.quadraticBezierTo(center.dx + radius * 0.55, baseY - radius * 0.1, center.dx + radius * 0.7, baseY - radius * 0.4);
+    // Right Hill
+    hillPath.quadraticBezierTo(center.dx + radius * 0.75, baseY - radius * 1.4, endX - 180, baseY - 5);
+    hillPath.lineTo(endX, baseY);
+
+    final hillPaint = Paint()
+      ..color = isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04)
+      ..style = PaintingStyle.fill;
+    
+    final fillPath = Path.from(hillPath);
+    fillPath.lineTo(endX, size.height);
+    fillPath.lineTo(startX, size.height);
+    fillPath.close();
+    canvas.drawPath(fillPath, hillPaint);
+
+    final guidePos = Offset(center.dx, center.dy - radius * 0.5);
+
+    // Calculate hiker positions
+    final sortedHikers = List<Hiker>.from(hikers)..sort((a, b) => a.hopCount.compareTo(b.hopCount));
+    final hikerPositions = <Offset>[];
+    
+    const double verticalSpacing = 45.0;
+    final startY = guidePos.dy;
+
+    for (int i = 0; i < sortedHikers.length; i++) {
+      final isLeft = (i % 2 == 0);
+      final xOffset = (isLeft ? -1 : 1) * 40.0; 
+      final yPos = startY + (i + 1) * verticalSpacing;
+      hikerPositions.add(Offset(center.dx + xOffset, yPos));
+    }
+
+    // 1. Static Grid Lines
     final gridPaint = Paint()
-      ..color = HikotColors.accent.withOpacity(0.1) 
+      ..color = isDarkMode ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.05)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.0;
 
@@ -399,50 +492,57 @@ class _RadarPainter extends CustomPainter {
     canvas.drawLine(Offset(center.dx - radius, center.dy), Offset(center.dx + radius, center.dy), gridPaint);
     canvas.drawLine(Offset(center.dx, center.dy - radius), Offset(center.dx, center.dy + radius), gridPaint);
 
-    // 2. Draw Fine-line Scanning Arc (Matte)
+    // 2. Scanning Arc
     final scanPaint = Paint()
-      ..color = Colors.white.withOpacity(0.05)
+      ..color = HikotColors.accentTeal.withOpacity(0.15)
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.0;
+      ..strokeWidth = 1.5;
     
     canvas.save();
     canvas.translate(center.dx, center.dy);
     canvas.rotate(rotation * 2 * math.pi);
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset.zero, radius: radius),
-      0, 0.5, false, scanPaint
-    );
+    
+    final sweepPaint = Paint()
+      ..shader = SweepGradient(
+        colors: [HikotColors.accentTeal.withOpacity(0.2), Colors.transparent],
+        stops: const [0.1, 0.4],
+      ).createShader(Rect.fromCircle(center: Offset.zero, radius: radius));
+    
+    canvas.drawCircle(Offset.zero, radius, sweepPaint);
+    canvas.drawLine(Offset.zero, Offset(radius, 0), scanPaint);
     canvas.restore();
 
-    // 3. Draw Guide Hub (Matte)
-    final guidePos = Offset(center.dx, center.dy - radius * 0.4);
+    // 3. Guide Hub
     canvas.drawCircle(guidePos, 6, Paint()..color = HikotColors.success);
     
-    // 4. Draw Hiker Nodes (Matte)
-    final sortedHikers = List<Hiker>.from(hikers)..sort((a, b) => a.hopCount.compareTo(b.hopCount));
-    const double verticalSpacing = 60.0;
-    final startY = guidePos.dy;
-
+    final guideTextPainter = TextPainter(
+      text: const TextSpan(
+        text: 'TOUR GUIDE',
+        style: TextStyle(color: HikotColors.success, fontSize: 11, fontWeight: FontWeight.w900, letterSpacing: 1.0)
+      ),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    guideTextPainter.paint(canvas, Offset(guidePos.dx + 12, guidePos.dy - 6));
+    
+    // 4. Hiker Nodes
     for (int i = 0; i < sortedHikers.length; i++) {
       final hiker = sortedHikers[i];
+      final hikerPos = hikerPositions[i];
       final color = hiker.status == HikerStatus.sos ? HikotColors.error : (hiker.status == HikerStatus.warning ? HikotColors.warning : HikotColors.success);
-      final isLeft = (i % 2 == 0);
-      final xOffset = (isLeft ? -1 : 1) * 40.0; 
-      final yPos = startY + (i + 1) * verticalSpacing;
-      final hikerPos = Offset(center.dx + xOffset, yPos);
-      final prevPos = i == 0 ? guidePos : Offset(center.dx + (i % 2 != 0 ? -40.0 : 40.0), startY + i * verticalSpacing);
+      final prevPos = i == 0 ? guidePos : hikerPositions[i - 1];
 
-      // Connection Line (Muted)
       canvas.drawLine(prevPos, hikerPos, Paint()..color = color.withOpacity(0.2)..strokeWidth = 1.5);
 
-      // Hiker Marker
-      canvas.drawCircle(hikerPos, 5, Paint()..color = color);
+      final blink = (math.sin(rotation * 2 * math.pi * 4) + 1) / 2;
+      final markerOpacity = 0.5 + (0.5 * blink);
+      
+      canvas.drawCircle(hikerPos, 8, Paint()..color = color.withOpacity(0.2 * markerOpacity));
+      canvas.drawCircle(hikerPos, 5, Paint()..color = color.withOpacity(markerOpacity));
 
-      // Text Labels (Minimalist)
       final textPainter = TextPainter(
         text: TextSpan(
           text: hiker.name.toUpperCase(),
-          style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)
+          style: TextStyle(color: isDarkMode ? Colors.white.withOpacity(markerOpacity) : Colors.black.withOpacity(markerOpacity), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 0.5)
         ),
         textDirection: TextDirection.ltr,
       )..layout();
@@ -453,3 +553,4 @@ class _RadarPainter extends CustomPainter {
   @override
   bool shouldRepaint(CustomPainter oldDelegate) => true;
 }
+

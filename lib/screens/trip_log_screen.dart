@@ -44,7 +44,7 @@ class _TripLogScreenState extends State<TripLogScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF0F0F0F),
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text('MISSION LOGS', style: TextStyle(fontWeight: FontWeight.w900, fontSize: 16, letterSpacing: 2)),
         centerTitle: true,
@@ -92,9 +92,9 @@ class _TripLogScreenState extends State<TripLogScreen> {
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.03),
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
@@ -118,12 +118,12 @@ class _TripLogScreenState extends State<TripLogScreen> {
             ),
             title: Text(
               trip.name,
-              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontWeight: FontWeight.bold, fontSize: 16),
             ),
             subtitle: Text(
               isActive ? 'CURRENT MISSION' : 'ARCHIVED: $dateStr',
               style: TextStyle(
-                color: (isActive ? Colors.greenAccent : Colors.white).withOpacity(0.4),
+                color: (isActive ? Colors.greenAccent : Theme.of(context).colorScheme.onSurface).withOpacity(0.4),
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 0.5,
@@ -174,13 +174,13 @@ class _TripLogScreenState extends State<TripLogScreen> {
       children: [
         Row(
           children: [
-            Icon(icon, color: Colors.white24, size: 12),
+            Icon(icon, color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3), size: 12),
             const SizedBox(width: 4),
-            Text(label, style: const TextStyle(color: Colors.white24, fontSize: 9, fontWeight: FontWeight.w900)),
+            Text(label, style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3), fontSize: 9, fontWeight: FontWeight.w900)),
           ],
         ),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+        Text(value, style: TextStyle(color: Theme.of(context).colorScheme.onSurface, fontSize: 14, fontWeight: FontWeight.bold)),
       ],
     );
   }
