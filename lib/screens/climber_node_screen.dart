@@ -13,6 +13,7 @@ import '../services/mesh_relay_service.dart';
 import '../services/settings_service.dart';
 import '../theme/app_theme.dart';
 import '../widgets/tactical_navigation_bar.dart';
+import '../widgets/realistic_iot_device.dart';
 import 'hardware_specs_screen.dart';
 import 'login_screen.dart';
 
@@ -256,7 +257,7 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
     return BoxDecoration(
       color: color ?? Theme.of(context).cardColor,
       borderRadius: BorderRadius.circular(16),
-      border: Border.all(color: Theme.of(context).dividerColor.withOpacity(0.1)),
+      border: null,
     );
   }
 
@@ -433,21 +434,25 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
                 children: [
                   _buildTopHeader(),
                   const SizedBox(height: 22),
-                  _sectionHeader('Your node', subtitle: 'Mesh ID and device reference.'),
-                  _buildIotHeroCard(),
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 12),
+                  RealisticIotDevice(
+                    nodeId: _nodeIdController.text.trim().isEmpty ? _settings.climberNodeId : _nodeIdController.text.trim(),
+                    hasGps: _lastPosition != null,
+                    batteryLevel: _climberBatteryPercent,
+                    meshHops: 1, // Simplified for UI
+                    isMeshActive: _meshReady,
+                    sosProgress: _holdProgress,
+                    isSending: _sending,
+                    onSosDown: _onSosDown,
+                    onSosUp: _onSosUp,
+                  ),
+                  const SizedBox(height: 32),
                   _sectionHeader('Live readings'),
                   _buildMetricGrid(),
                   const SizedBox(height: 22),
                   _sectionHeader('Position'),
                   _buildGpsCard(),
                   const SizedBox(height: 22),
-                  _sectionHeader('Emergency'),
-                  KeyedSubtree(
-                    key: _sosSectionKey,
-                    child: _buildSosSection(),
-                  ),
-                  const SizedBox(height: 16),
                   _buildHowItWorksExpansion(),
                 ],
               ),
@@ -596,64 +601,7 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
     );
   }
 
-  Widget _buildIotHeroCard() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: _climberCardDecoration(),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(12),
-            child: Container(
-              width: 88,
-              height: 88,
-              decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.2),
-                border: Border.all(color: Colors.white.withOpacity(0.05)),
-              ),
-              child: Image.asset(
-                ClimberNodeScreen.iotImageAsset,
-                fit: BoxFit.cover,
-                alignment: Alignment.center,
-                errorBuilder: (_, __, ___) => Image.asset(
-                  'assets/hiker_iot_device.jpg',
-                  fit: BoxFit.cover,
-                  alignment: Alignment.center,
-                  errorBuilder: (_, ___, ____) => ColoredBox(
-                    color: HikotColors.surfaceLight,
-                    child: Icon(Icons.developer_board_rounded, color: HikotColors.accentTeal.withOpacity(0.5)),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Wearable node',
-                  style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16, color: Colors.white, letterSpacing: 0.2),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Mesh ID ${_settings.climberNodeId}',
-                  style: const TextStyle(fontSize: 13, color: HikotColors.accentTeal, fontWeight: FontWeight.w700),
-                ),
-                const SizedBox(height: 4),
-                const Text(
-                  'Status: Operational',
-                  style: TextStyle(fontSize: 12, color: HikotColors.textMuted),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
+
 
   Widget _metricCell(String value, String label) {
     return Container(
@@ -733,132 +681,7 @@ class _ClimberNodeScreenState extends State<ClimberNodeScreen> {
     );
   }
 
-  Widget _buildSosSection() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: HikotColors.error.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: HikotColors.error.withOpacity(0.2)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const Row(
-            children: [
-              Icon(Icons.health_and_safety_rounded, size: 22, color: HikotColors.error),
-              SizedBox(width: 10),
-              Expanded(
-                child: Text(
-                  'SOS uses BLE mesh with your last coordinates.',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: Colors.white, height: 1.3),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          _buildSosHoldButton(),
-          const SizedBox(height: 8),
-          const Text(
-            'Hold the bar for 3 seconds, or release early to cancel. Mesh broadcast is prioritized.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12, color: HikotColors.textSecondary, height: 1.4),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildSosHoldButton() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Material(
-          color: Colors.transparent,
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTapDown: (_) => _onSosDown(),
-            onTapUp: (_) => _onSosUp(),
-            onTapCancel: () => _onSosUp(),
-            child: Stack(
-              alignment: Alignment.bottomCenter,
-              children: [
-                Container(
-                  width: double.infinity,
-                  height: 56,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(14),
-                    border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
-                  ),
-                  child: _sending
-                      ? const SizedBox(width: 24, height: 24, child: CircularProgressIndicator(strokeWidth: 3, color: HikotColors.error))
-                      : Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.touch_app_rounded, size: 20, color: HikotColors.error.withOpacity(0.8)),
-                            const SizedBox(width: 10),
-                            const Text(
-                              'HOLD FOR SOS (3 SEC)',
-                              style: TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: 1.0),
-                            ),
-                          ],
-                        ),
-                ),
-                if (_holdProgress > 0)
-                  Positioned(
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    child: ClipRRect(
-                      borderRadius: const BorderRadius.vertical(bottom: Radius.circular(13)),
-                      child: LinearProgressIndicator(
-                        value: _holdProgress,
-                        minHeight: 4,
-                        backgroundColor: Colors.transparent,
-                        color: HikotColors.error,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(height: 6),
-        TextButton(
-          style: TextButton.styleFrom(foregroundColor: HikotColors.error.withOpacity(0.7)),
-          onPressed: _sending
-              ? null
-              : () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (ctx) => AlertDialog(
-                      title: const Text('Send SOS now?'),
-                      content: const Text(
-                        'For field safety the physical node uses a 3-second hold. '
-                        'Use this only if you cannot hold the button (e.g. gloves).',
-                      ),
-                      actions: [
-                        TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
-                        FilledButton(
-                          onPressed: () {
-                            Navigator.pop(ctx);
-                            _sendSos();
-                          },
-                          style: FilledButton.styleFrom(backgroundColor: const Color(0xFFDC2626)),
-                          child: const Text('Send SOS'),
-                        ),
-                      ],
-                    ),
-                  );
-                },
-          child: const Text('Can’t hold? Confirm to send'),
-        ),
-      ],
-    );
-  }
 
   Widget _buildBottomNav() {
     return TacticalNavigationBar(
